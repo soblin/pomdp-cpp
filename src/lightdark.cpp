@@ -1,7 +1,10 @@
 #include <algorithm>
+#include <fstream>
 #include <iostream>
 #include <numeric>
 
+#include <xtensor/xadapt.hpp>
+#include <xtensor/xarray.hpp>
 #include <xtensor/xio.hpp>
 
 #include "pomdp-cpp/pomdp.h"
@@ -39,6 +42,24 @@ class SimpleLightDark : public POMDPModel<int, int, double> {
     States sub_actions(const State &s) const { return actions(); }
 };
 
+void write_qmat(const xt::xtensor<double, 2> &qmat) {
+    std::ofstream ofs("ans_cpp.csv");
+    if (!ofs) {
+        std::cout << "failed to open ans.csv" << std::endl;
+        return;
+    }
+    auto shape = qmat.shape();
+    for (unsigned i = 0; i < shape[0]; ++i) {
+        for (unsigned j = 0; j < shape[1]; ++j) {
+            ofs << qmat(i, j);
+            if (j != shape[1] - 1)
+                ofs << ", ";
+        }
+        ofs << '\n';
+    }
+    ofs.close();
+}
+
 int main() {
     std::vector<int> states(2 * r + 2);
     std::iota(states.begin(), states.end(),
@@ -51,5 +72,7 @@ int main() {
     Solver solver(simple_lightdark);
     solver.solve();
     // std::cout << solver.qmat() << std::endl;
+    // std::cout << solver.qmat() << std::endl;
+    write_qmat(solver.qmat());
     return 0;
 }
