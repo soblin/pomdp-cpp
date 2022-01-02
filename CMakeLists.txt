@@ -15,3 +15,5 @@ target_include_directories(tiger PUBLIC ${xtensor_INCLUDE_DIRS} ${${PROJECT_NAME
 
 add_executable(lightdark src/lightdark.cpp)
 target_include_directories(lightdark PUBLIC ${xtensor_INCLUDE_DIRS} ${${PROJECT_NAME}_INCLUDE_DIRS})
+
+# add valgrind test: valgrind --tool=memcheck --leak-check=yes --undef-value-errors=no <executable>
