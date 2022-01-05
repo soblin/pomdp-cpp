@@ -15,7 +15,9 @@ public:
 // TODO: pass std::random_device or seed engine as the argument ?
 template <typename State> class Categorical : public Distribution<State> {
 public:
-  Categorical(const std::vector<State> &states, const std::vector<double> &probs) : states_(states), probs_(probs) {
+  Categorical(const std::vector<State> &states,
+              const std::vector<double> &probs)
+      : states_(states), probs_(probs) {
     if (states.size() != probs.size()) {
       std::exit(0);
     }
@@ -30,7 +32,9 @@ public:
     int index = d(gen);
     return states_[index];
   }
-  const std::vector<std::tuple<State, double>> &sps() const override { return sps_; }
+  const std::vector<std::tuple<State, double>> &sps() const override {
+    return sps_;
+  }
 
 private:
   const std::vector<State> states_;
@@ -40,10 +44,14 @@ private:
 
 template <typename State> class Deterministic : public Distribution<State> {
 public:
-  Deterministic(const State &state) : state_(state) { sps_.emplace_back(state, 1.0); }
+  Deterministic(const State &state) : state_(state) {
+    sps_.emplace_back(state, 1.0);
+  }
   ~Deterministic() = default;
   State draw() const override { return state_; }
-  const std::vector<std::tuple<State, double>> &sps() const override { return sps_; }
+  const std::vector<std::tuple<State, double>> &sps() const override {
+    return sps_;
+  }
 
 private:
   State state_;
@@ -54,7 +62,9 @@ private:
 // Distribution<State> {};
 template <typename State> class Normal : public Distribution<State> {
 public:
-  Normal(const State &mu, const double sigma) : mu_(mu), sigma_(sigma) { sps_.emplace_back(mu_, 1.0); }
+  Normal(const State &mu, const double sigma) : mu_(mu), sigma_(sigma) {
+    sps_.emplace_back(mu_, 1.0);
+  }
   ~Normal() = default;
   State draw() const override {
     static std::mt19937 gen(std::random_device{}());
@@ -62,7 +72,9 @@ public:
     return static_cast<State>(d(gen));
   }
   // TODO: should return belief particles
-  const std::vector<std::tuple<State, double>> &sps() const override { return sps_; }
+  const std::vector<std::tuple<State, double>> &sps() const override {
+    return sps_;
+  }
 
 private:
   const State mu_;

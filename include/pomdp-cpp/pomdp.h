@@ -16,13 +16,14 @@ public:
   using State = S;
   using Action = A;
   using Observation = O;
-  template <typename T> using Container = std::vector<T>; // should be vector or array
+  template <typename T>
+  using Container = std::vector<T>; // should be vector or array
   using States = Container<S>;
   using Actions = Container<A>;
   using Observations = Container<O>;
 
-  POMDPModel(std::span<State, std::dynamic_extent> states, std::span<Action, std::dynamic_extent> actions,
-             std::span<Observation, std::dynamic_extent> observations, double discount = 0.95)
+  POMDPModel(std::span<State> states, std::span<Action> actions,
+             std::span<Observation> observations, double discount = 0.95)
       : discount_(discount), initial_state_(std::nullopt) {
     for (const auto &state : states)
       states_.push_back(state);
@@ -35,8 +36,10 @@ public:
 
     index_states_actions();
   }
-  POMDPModel(const std::initializer_list<State> &states, const std::initializer_list<Action> &actions,
-             const std::initializer_list<Observation> &observations, double discount = 0.95)
+  POMDPModel(const std::initializer_list<State> &states,
+             const std::initializer_list<Action> &actions,
+             const std::initializer_list<Observation> &observations,
+             double discount = 0.95)
       : discount_(discount), initial_state_(std::nullopt) {
     for (const auto &state : states)
       states_.push_back(state);
@@ -51,11 +54,12 @@ public:
   }
   /// transition: in MDP, this should return a state. in POMDP, it should return
   /// a distribution(aka belief)
-  virtual ptr<distribution::Distribution<State>> transition(const State &s, const Action &a) const = 0;
+  virtual ptr<distribution::Distribution<State>>
+  transition(const State &s, const Action &a) const = 0;
 
   /// observation: only in POMDP
-  virtual ptr<distribution::Distribution<Observation>> observation(const State &s, const Action &a,
-                                                                   const State &sp) const = 0;
+  virtual ptr<distribution::Distribution<Observation>>
+  observation(const State &s, const Action &a, const State &sp) const = 0;
 
   /// reward: TODO. it could take sp(next state) and observation as well.
   virtual double reward(const State &s, const Action &a) const = 0;
@@ -108,8 +112,10 @@ public:
   using State = S;
   using Action = A;
   using Observation = O;
-  ValueIterationSolver(POMDPModel<S, A, O> &model, int max_iterations = 100, double bel_res = 0.001)
-      : model_(model), max_iterations_(max_iterations), bel_res_(bel_res), discount_(model.discount()) {
+  ValueIterationSolver(POMDPModel<S, A, O> &model, int max_iterations = 100,
+                       double bel_res = 0.001)
+      : model_(model), max_iterations_(max_iterations), bel_res_(bel_res),
+        discount_(model.discount()) {
     // https://xtensor.readthedocs.io/en/latest/quickref/basic.html#initialization
     auto ns = model_.states().size();
     auto na = model_.actions().size();
@@ -150,7 +156,8 @@ public:
         double max_util = -std::numeric_limits<double>::infinity();
         for (const auto &action : sub_actions) {
           auto iaction = model_.action2ind(action);
-          auto dist = model_.transition(state, action); // create distribution over neighbors
+          auto dist = model_.transition(
+              state, action); // create distribution over neighbors
           double u = 0.0;
           for (auto [s, p] : dist->sps()) {
             if (p == 0.0)

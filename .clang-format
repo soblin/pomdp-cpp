@@ -3,5 +3,5 @@ IndentWidth: 2
 NamespaceIndentation: None
 Language: Cpp
 Standard: Auto
-ColumnLimit: 120
+ColumnLimit: 80
 UseCRLF: false
