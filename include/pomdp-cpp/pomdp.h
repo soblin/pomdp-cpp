@@ -6,8 +6,8 @@
 
 #include <xtensor/xtensor.hpp>
 
-#include "distribution.h"
-#include "util.h"
+#include <pomdp-cpp/distribution.h>
+#include <pomdp-cpp/util.h>
 
 namespace pomdp_cpp {
 
@@ -100,11 +100,13 @@ private:
 
 template <typename S, typename A, typename O> class AlphaVectorPolicy {
 public:
-  AlphaVectorPolicy(const xt::xtensor<double, 2> &qmat) {}
+  AlphaVectorPolicy(const xt::xtensor<double, 2> &qmat) : qmat_(qmat) {}
   // design
   // calc the internal product of each column of qmat and belief, and then the
   // corresponding action that gives the highest value. need to consider the
   // design of "belief" of state
+private:
+  const xt::xtensor<double, 2> &qmat_;
 };
 
 template <typename S, typename A, typename O> class ValueIterationSolver {

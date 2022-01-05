@@ -78,6 +78,7 @@ int main() {
   using Solver = ValueIterationSolver<int, int, double>;
   Solver solver(simple_lightdark);
   solver.solve();
+  auto policy = AlphaVectorPolicy<int, int, double>(solver.qmat());
   // write_qmat(solver.qmat());
   return 0;
 }

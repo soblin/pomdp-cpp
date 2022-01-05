@@ -27,7 +27,8 @@ public:
   }
   ~Categorical() = default;
   State draw() const override {
-    std::mt19937 gen(std::random_device{}());
+    // https://stackoverflow.com/questions/6223355/static-variables-in-member-functions
+    static std::mt19937 gen(std::random_device{}()); // this can be shared
     std::discrete_distribution<> d(probs_.begin(), probs_.end());
     int index = d(gen);
     return states_[index];
