@@ -1,3 +1,5 @@
+#pragma once
+
 #include <initializer_list>
 #include <optional>
 #include <span>
@@ -5,6 +7,7 @@
 #include <unordered_map>
 
 #include <xtensor/xtensor.hpp>
+#include <xtensor/xview.hpp>
 
 #include <pomdp-cpp/distribution.h>
 #include <pomdp-cpp/util.h>
@@ -98,15 +101,62 @@ private:
   }
 };
 
+template <typename S> class Belief {
+public:
+  Belief(std::span<double> probs_) {
+    for (auto &&prob : probs_)
+      probs.push_back(prob);
+  }
+  std::vector<double> probs;
+  // private:
+  // std::vector<int> istates; // istate of state that has non-zero prob
+};
+
 template <typename S, typename A, typename O> class AlphaVectorPolicy {
 public:
-  AlphaVectorPolicy(const xt::xtensor<double, 2> &qmat) : qmat_(qmat) {}
+  AlphaVectorPolicy(const xt::xtensor<double, 2> &qmat) : qmat_(qmat) {
+    auto shape = qmat_.shape();
+    ns_ = shape[0];
+    na_ = shape[1];
+  }
+  double value(const Belief<S> &bel) {
+    double max = -std::numeric_limits<double>::infinity();
+    int max_a = -1;
+    for (int i = 0; i < na_; ++i) {
+      auto alpha = xt::col(qmat_, i);
+      double val = 0;
+      for (int j = 0; j < ns_; ++j)
+        val += alpha(j) * bel.probs[j];
+      if (val > max) {
+        max = val;
+        max_a = i;
+      }
+    }
+    return max;
+  }
+  int iaction(const Belief<S> &bel) {
+    double max = -std::numeric_limits<double>::infinity();
+    int max_a = -1;
+    for (int i = 0; i < na_; ++i) {
+      auto alpha = xt::col(qmat_, i);
+      double val = 0;
+      for (int j = 0; j < ns_; ++j)
+        val += alpha(j) * bel.probs[j];
+      if (val > max) {
+        max = val;
+        max_a = i;
+      }
+    }
+    return max_a;
+  }
   // design
   // calc the internal product of each column of qmat and belief, and then the
   // corresponding action that gives the highest value. need to consider the
   // design of "belief" of state
 private:
   const xt::xtensor<double, 2> &qmat_;
+  int ns_;
+  int na_;
 };
 
 template <typename S, typename A, typename O> class ValueIterationSolver {
